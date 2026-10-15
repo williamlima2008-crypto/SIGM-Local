@@ -1,0 +1,36 @@
+SIGM LOCAL  -  versão 1.0.0
+==========================
+App de gestão de membros que roda só no celular. Os dados ficam no próprio
+aparelho (nada é enviado a servidor). Funciona sem internet depois de aberto
+uma vez.
+
+O QUE TEM
+- Cadastro de membros com foto, busca, filtro por situação
+- Aniversariantes do mês (com botão de WhatsApp)
+- Relatórios em PDF e planilha (CSV)
+- 4 documentos em PDF: Ficha Cadastral, Pedido de Membramento,
+  Pedido de Reconciliação e Carta de Recomendação (mesmos modelos do SIGM)
+- Backup em arquivo (salvar / restaurar) e login opcional com usuário e senha (guardada só como hash)
+
+COMO PUBLICAR (GitHub Pages)
+1. Crie um repositório PÚBLICO novo no GitHub (ex.: SIGM-Local).
+2. Coloque TODO o conteúdo desta pasta na raiz do repositório
+   (index.html, sw.js, manifest.webmanifest, css/, js/, lib/, modelos/, icones/).
+3. Settings > Pages > Source: "Deploy from a branch" > main / (root) > Save.
+4. O endereço fica https://SEU-USUARIO.github.io/SIGM-Local/
+5. No celular, abra o endereço e instale (Android: menu do Chrome > Instalar app;
+   iPhone: Safari > Compartilhar > Adicionar à Tela de Início).
+Como o repositório é público, NÃO coloque dados de membros nele: os dados
+ficam só no celular de quem usa.
+
+PARA TESTAR NO COMPUTADOR
+Abra um terminal nesta pasta e rode:  python -m http.server 8000
+Depois acesse http://localhost:8000
+
+ATUALIZAR O APP NO FUTURO
+Ao mudar qualquer arquivo, troque VERSAO em sw.js (ex.: sigm-local-v2) para
+os celulares receberem a versão nova.
+
+IMPORTANTE
+Cada celular tem os seus próprios dados. Para passar os dados de um celular
+para outro: Ajustes > Salvar backup (no antigo) e Restaurar backup (no novo).

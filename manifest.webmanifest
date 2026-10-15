@@ -1,0 +1,16 @@
+{
+  "name": "SIGM Local",
+  "short_name": "SIGM Local",
+  "description": "Gestão de membros da igreja, com os dados guardados só no seu celular.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f4f7",
+  "theme_color": "#0b5ed7",
+  "icons": [
+    {"src": "icones/icone-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icones/icone-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

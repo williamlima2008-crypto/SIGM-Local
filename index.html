@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SIGM Local</title>
+  <meta name="theme-color" content="#0b5ed7">
+  <meta name="description" content="Gestão de membros da igreja, com os dados guardados só no seu celular.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icones/icone-192.png">
+  <link rel="apple-touch-icon" href="icones/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SIGM Local">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topo" id="topo"><h1 id="titulo">SIGM Local</h1><div id="acao-topo"></div></header>
+  <main id="tela" tabindex="-1"></main>
+  <nav class="abas" id="abas" aria-label="Seções">
+    <a href="#/" data-aba="membros"><span aria-hidden="true">👥</span>Membros</a>
+    <a href="#/aniversariantes" data-aba="aniversariantes"><span aria-hidden="true">🎂</span>Aniversários</a>
+    <a href="#/relatorios" data-aba="relatorios"><span aria-hidden="true">📄</span>Relatórios</a>
+    <a href="#/ajustes" data-aba="ajustes"><span aria-hidden="true">⚙️</span>Ajustes</a>
+  </nav>
+  <div id="camada"></div>
+  <div id="aviso" role="status" aria-live="polite"></div>
+  <script src="lib/pdf-lib.min.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
