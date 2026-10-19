@@ -1,6 +1,6 @@
 /* SIGM Local - service worker: guarda o app para abrir sem internet.
    Os dados dos membros ficam no IndexedDB, nunca neste cache. */
-const VERSAO = "sigm-local-v1";
+const VERSAO = "sigm-local-v2";
 const ARQUIVOS = [
   "./", "index.html", "manifest.webmanifest", "css/app.css",
   "js/db.js", "js/util.js", "js/pdf.js", "js/app.js", "lib/pdf-lib.min.js",

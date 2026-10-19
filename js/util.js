@@ -35,9 +35,20 @@ function interpretarData(valor) {
   if (data.getFullYear() !== a || data.getMonth() !== mes - 1 || data.getDate() !== d) return null;
   return { dia: d, mes, ano: a };
 }
+function mascaraData(valor) {
+  const d = String(valor || "").replace(/\D/g, "").slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
 function formatarData(valor) {
   const d = interpretarData(valor);
-  if (!d) return String(valor || "");
+  if (!d) {
+    const t = String(valor || "").trim();
+    if (/^true$/i.test(t)) return "Sim";
+    if (/^false$/i.test(t)) return "Não";
+    return t;
+  }
   return `${String(d.dia).padStart(2, "0")}/${String(d.mes).padStart(2, "0")}/${d.ano}`;
 }
 function contato(m) { return m.celular || m.telefone || ""; }

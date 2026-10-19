@@ -61,6 +61,21 @@ const CAMPOS_IGREJA = [
   ["congregacao_local_campo_setor", "Campo / setor da congregação", "Sai na ficha e na carta"],
   ["congregacao_local_cidade", "Cidade da congregação", "Sai na data dos pedidos"],
 ];
+// campos que podem ser revisados antes de gerar cada PDF: [chave, rotulo, tipo, opcoes]
+const SIM_NAO = ["Sim", "Não"];
+const CAMPOS_DOC = {
+  ficha: [["setor_campo", "Nº e nome do setor/campo"], ["igreja_local_batismo_aguas", "Igreja do batismo nas águas"],
+    ["igreja_local_batismo_espirito_santo", "Igreja do batismo no Espírito Santo"], ["recados_outros", "Recados / outros telefones"]],
+  membramento: [["congregacao", "Congregação"], ["numero_congregacao", "Nº da congregação"], ["dirigente", "Dirigente"],
+    ["igreja_origem", "Igreja de origem"], ["cidade_origem", "Cidade de origem"], ["estado_origem", "UF de origem"],
+    ["trouxe_carta", "Trouxe a carta de mudança?", "select", SIM_NAO], ["trouxe_familia", "Trouxe a família?", "select", SIM_NAO],
+    ["observacoes", "Observações", "area"], ["local_cidade", "Cidade (na data)"]],
+  reconciliacao: [["congregacao", "Congregação"], ["numero_congregacao", "Nº da congregação"], ["dirigente", "Dirigente"],
+    ["observacoes", "Observações", "area"], ["local_cidade", "Cidade (na data)"]],
+  carta: [["apresentar_em", "Apresentamos à Assembleia de Deus em"], ["cargo", "Cargo"], ["sexo", "Sexo", "select", ["Masculino", "Feminino"]],
+    ["setor_campo", "Setor nº"], ["congregacao", "Congregação"]],
+};
+
 const TIPOS_RELATORIO = [
   ["todos", "Lista de todos os membros"], ["membros", "Membros"], ["congregados", "Congregados"],
   ["visitantes", "Visitantes"], ["aniversariantes", "Aniversariantes do mês"],
@@ -112,6 +127,26 @@ const escolher = (titulo, texto, opcoes) => janela((fechar) => [
   h("div", { class: "botoes" }, ...opcoes.map(([rotulo, valor, classe]) => h("button", { class: "btn " + (classe || ""), onclick: () => fechar(valor) }, rotulo)),
     h("button", { class: "btn", onclick: () => fechar(null) }, "Cancelar")),
 ]);
+
+// tela "Revisar antes de gerar": devolve os valores (ou null se cancelar)
+function revisarDocumento(tipo, membro) {
+  const base = PDFS.montarDados(membro, estado.config);
+  return janela((fechar) => {
+    const entradas = {};
+    const campos = CAMPOS_DOC[tipo].map(([chave, rotulo, kind, opcoes]) => {
+      let el;
+      if (kind === "select") { el = h("select", {}, h("option", { value: "" }, "—"), ...opcoes.map((o) => h("option", { value: o }, o))); el.value = base[chave] || ""; }
+      else if (kind === "area") { el = h("textarea", { maxlength: "2000" }); el.value = base[chave] || ""; }
+      else el = h("input", { type: "text", value: base[chave] || "", maxlength: "160", autocomplete: "off" });
+      entradas[chave] = el;
+      return h("label", { class: "campo" }, h("span", {}, rotulo), el);
+    });
+    return [h("h3", {}, PDFS.DOCUMENTOS[tipo]), h("p", {}, "Confira e corrija o que for preciso. Isso vale só para este PDF; o cadastro não muda."),
+      h("div", { class: "rolavel" }, campos),
+      h("div", { class: "botoes" }, h("button", { class: "btn", onclick: () => fechar(null) }, "Cancelar"),
+        h("button", { class: "btn btn-p", onclick: () => fechar(Object.fromEntries(Object.entries(entradas).map(([k, el]) => [k, el.value.trim()]))) }, "Gerar PDF"))];
+  });
+}
 
 function mostrarPdf(bytes, nome) {
   const blob = new Blob([bytes], { type: "application/pdf" });
@@ -241,15 +276,12 @@ async function vistaMembro(id) {
   const zap = linkWhatsapp(contato(m));
 
   async function gerar(tipo, botao) {
-    let apresentar = "";
-    if (tipo === "carta") {
-      apresentar = await perguntar("Carta de Recomendação", "Apresentamos à Assembleia de Deus em (opcional)", "");
-      if (apresentar === null) return;
-    }
+    const ajustes = await revisarDocumento(tipo, m);
+    if (ajustes === null) return;
     botao.disabled = true;
     avisar("Gerando o PDF…", 8000);
     try {
-      const { bytes, nome } = await PDFS.gerarDocumento(tipo, m, estado.config, foto, apresentar);
+      const { bytes, nome } = await PDFS.gerarDocumento(tipo, m, estado.config, foto, ajustes);
       avisar(estado.config.nome_igreja ? "PDF pronto." : "PDF pronto. Dica: preencha os dados da igreja em Ajustes.");
       await mostrarPdf(bytes, nome);
     } catch (e) {
@@ -296,6 +328,7 @@ async function vistaFormulario(id) {
 
   const entradas = {};
   const erros = {};
+  const CAMPOS_DATA = GRUPOS.flatMap(([, campos]) => campos).filter((c) => c[2] === "date").map((c) => c[0]);
   function criar([chave, rotulo, tipo, extra]) {
     let el;
     if (tipo === "select") {
@@ -306,7 +339,7 @@ async function vistaFormulario(id) {
       el = h("textarea", { name: chave, maxlength: "2000" }); el.value = m[chave] || "";
     } else {
       const atr = { name: chave, type: "text", value: m[chave] || "", autocomplete: "off" };
-      if (tipo === "date") atr.type = "date";
+      if (tipo === "date") { atr.value = formatarData(m[chave]); atr.inputmode = "numeric"; atr.placeholder = "DD/MM/AAAA"; atr.maxlength = "10"; }
       if (tipo === "tel") { atr.type = "tel"; atr.inputmode = "tel"; }
       if (tipo === "email") { atr.type = "email"; atr.inputmode = "email"; }
       if (tipo === "numeric") atr.inputmode = "numeric";
@@ -314,6 +347,7 @@ async function vistaFormulario(id) {
       if (tipo === "cargo") atr.list = "lista-cargos";
       el = h("input", atr);
       if (tipo === "uf") el.addEventListener("input", () => { el.value = el.value.toUpperCase(); });
+      if (tipo === "date") el.addEventListener("input", () => { if (/^[\d\/]*$/.test(el.value)) el.value = mascaraData(el.value); });
     }
     entradas[chave] = el;
     erros[chave] = h("div", { class: "erro", hidden: true });
@@ -355,6 +389,14 @@ async function vistaFormulario(id) {
     const falhas = {};
     if (!valores.nome) falhas.nome = "Informe o nome.";
     if (valores.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(valores.email)) falhas.email = "E-mail inválido.";
+    for (const chave of CAMPOS_DATA) {
+      const v = valores[chave];
+      if (!v) continue;
+      const permiteSimNao = chave === "batismo_aguas" || chave === "data_batismo_espirito_santo";
+      if (permiteSimNao && /^(sim|não|nao)$/i.test(v)) { valores[chave] = /^s/i.test(v) ? "Sim" : "Não"; continue; }
+      if (!interpretarData(v)) falhas[chave] = "Use a data no formato DD/MM/AAAA.";
+      else valores[chave] = formatarData(v);
+    }
     if (Object.keys(falhas).length) {
       for (const [k, t] of Object.entries(falhas)) { erros[k].textContent = t; erros[k].hidden = false; }
       entradas[Object.keys(falhas)[0]].focus();
