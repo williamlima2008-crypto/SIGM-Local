@@ -572,7 +572,7 @@ function vistaAjustes() {
     const conta = await DB.lerMeta("conta", null);
     if (!temCripto()) { cartaoLogin.replaceChildren(h("h2", {}, "Login e senha"), h("p", { class: "suave" }, "Disponível quando o app é aberto pelo endereço seguro (https).")); return; }
     cartaoLogin.replaceChildren(h("h2", {}, "Login e senha"),
-      h("p", { class: "suave" }, "Pede usuário e senha ao abrir o app. A senha é guardada só como código de verificação (hash), nunca o texto. Atenção: não há como recuperar a senha; se esquecer, só apagando os dados do app e restaurando um backup. Ela não criptografa os cadastros, então use também a senha de tela do celular."),
+      h("p", { class: "suave" }, "Pede usuário e senha ao abrir o app. A senha é guardada só como código de verificação (hash), nunca o texto. Atenção: não há como recuperar a senha; se esquecer, só apagando os dados do app e restaurando um backup. Importante: ela só trava a tela do app e NÃO criptografa os cadastros. Quem tiver o aparelho desbloqueado pode ler os dados pelo navegador; por isso, use também a senha de tela do celular."),
       conta ? h("div", { style: "margin-top:10px" },
         h("p", { class: "suave", style: "margin-bottom:10px" }, `Usuário: ${conta.usuario}`),
         h("div", { class: "botoes" }, h("button", { class: "btn", onclick: () => definirConta(conta) }, "Trocar senha"),
@@ -593,13 +593,13 @@ function vistaAjustes() {
       const erro = h("div", { class: "erro" });
       const ok = () => {
         if (!usuario.value.trim()) { erro.textContent = "Informe o usuário."; return; }
-        if (senha.value.length < 6) { erro.textContent = "A senha deve ter pelo menos 6 caracteres."; return; }
+        if (senha.value.length < 8) { erro.textContent = "A senha deve ter pelo menos 8 caracteres."; return; }
         if (senha.value !== repete.value) { erro.textContent = "As senhas não são iguais."; return; }
         fechar({ usuario: usuario.value.trim(), senha: senha.value });
       };
       return [h("h3", {}, atual ? "Nova senha" : "Criar login"),
         h("label", { class: "campo" }, h("span", {}, "Usuário"), usuario),
-        h("label", { class: "campo" }, h("span", {}, "Senha (mínimo 6 caracteres)"), senha),
+        h("label", { class: "campo" }, h("span", {}, "Senha (mínimo 8 caracteres)"), senha),
         h("label", { class: "campo" }, h("span", {}, "Repita a senha"), repete), erro,
         h("div", { class: "botoes" }, h("button", { class: "btn", onclick: () => fechar(null) }, "Cancelar"), h("button", { class: "btn btn-p", onclick: ok }, "Salvar"))];
     });
@@ -632,7 +632,7 @@ function vistaAjustes() {
   const conteudo = h("div", {},
     h("div", { class: "card" }, h("h2", {}, "Dados da igreja"), h("p", { class: "suave", style: "margin-bottom:12px" }, "Usados para preencher os documentos em PDF."), formIgreja),
     h("div", { class: "card" }, h("h2", {}, "Backup"),
-      h("p", {}, "Seus dados ficam só neste aparelho. Se perder o celular ou limpar os dados do navegador, só o backup salva tudo. Guarde o arquivo no Google Drive, e-mail ou WhatsApp."),
+      h("p", {}, "Seus dados ficam só neste aparelho. Se perder o celular ou limpar os dados do navegador, só o backup salva tudo. O arquivo de backup não é criptografado e contém nomes, CPFs e fotos: guarde-o só em lugar seguro (seu Google Drive pessoal, por exemplo) e não o deixe em pastas compartilhadas nem o envie em grupos."),
       quando, h("div", { class: "botoes" }, bSalvar, h("button", { class: "btn", onclick: () => arqBackup.click() }, "Restaurar backup")), arqBackup),
     cartaoLogin,
     h("div", { class: "card" }, h("h2", {}, "Instalar no celular"), blocoInstalar),
